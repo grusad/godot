@@ -29,11 +29,14 @@
 /*************************************************************************/
 
 #include "texture.h"
+#include <thread>
+#include <chrono>
 
 #include "core/core_string_names.h"
 #include "core/io/image_loader.h"
 #include "core/method_bind_ext.gen.inc"
 #include "core/os/os.h"
+#include "core/os/input.h"
 #include "mesh.h"
 #include "scene/resources/bit_map.h"
 #include "servers/camera/camera_feed.h"
@@ -1794,7 +1797,9 @@ CurveTexture::~CurveTexture() {
 
 GradientTexture::GradientTexture() {
 	update_pending = false;
-	width = 2048;
+	width = 1024;
+	height = 1024;
+	delay = 10;
 
 	texture = VS::get_singleton()->texture_create();
 	_queue_update();
@@ -1846,35 +1851,52 @@ void GradientTexture::_queue_update() {
 
 void GradientTexture::_update() {
 
+
+	/**if(Input::get_singleton()->is_mouse_button_pressed(BUTTON_LEFT)){
+		ERR_FAIL_MSG("pressed == true");
+	}*/
 	update_pending = false;
 
 	if (gradient.is_null())
 		return;
 
+	
 	PoolVector<uint8_t> data;
-	data.resize(width * 4);
+	data.resize(width * height * 4);
 	{
 		PoolVector<uint8_t>::Write wd8 = data.write();
 		Gradient &g = **gradient;
 
-		for (int i = 0; i < width; i++) {
+		Point2 center = Point2(width / 2, height / 2);
 
-			float ofs = float(i) / (width - 1);
-			Color color = g.get_color_at_offset(ofs);
+		
 
-			wd8[i * 4 + 0] = uint8_t(CLAMP(color.r * 255.0, 0, 255));
-			wd8[i * 4 + 1] = uint8_t(CLAMP(color.g * 255.0, 0, 255));
-			wd8[i * 4 + 2] = uint8_t(CLAMP(color.b * 255.0, 0, 255));
-			wd8[i * 4 + 3] = uint8_t(CLAMP(color.a * 255.0, 0, 255));
+		for (int j = 0; j < height; j++) {
+
+			for (int i = 0; i < width; ++i){
+
+				real_t dist = center.distance_to(Vector2(i,j));
+				float ofs = float(dist * 2) / (width - 1);
+				Color color = g.get_color_at_offset(ofs); 
+				/**float ofs = float(i) / (width - 1);
+				Color color = g.get_color_at_offset(ofs);*/
+
+				wd8[(i + width * j) * 4 + 0] = uint8_t(CLAMP(color.r * 255.0, 0, 255));
+				wd8[(i + width * j) * 4 + 1] = uint8_t(CLAMP(color.g * 255.0, 0, 255));
+				wd8[(i + width * j) * 4 + 2] = uint8_t(CLAMP(color.b * 255.0, 0, 255));
+				wd8[(i + width * j) * 4 + 3] = uint8_t(CLAMP(color.a * 255.0, 0, 255));
+
+
+			}
 		}
 	}
 
-	Ref<Image> image = memnew(Image(width, 1, false, Image::FORMAT_RGBA8, data));
+	Ref<Image> image = memnew(Image(width, height, false, Image::FORMAT_RGBA8, data));
 
-	VS::get_singleton()->texture_allocate(texture, width, 1, 0, Image::FORMAT_RGBA8, VS::TEXTURE_TYPE_2D, VS::TEXTURE_FLAG_FILTER);
+	VS::get_singleton()->texture_allocate(texture, width, height, 0, Image::FORMAT_RGBA8, VS::TEXTURE_TYPE_2D, VS::TEXTURE_FLAG_FILTER);
 	VS::get_singleton()->texture_set_data(texture, image);
-
 	emit_changed();
+	
 }
 
 void GradientTexture::set_width(int p_width) {

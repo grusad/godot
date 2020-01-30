@@ -1433,6 +1433,7 @@ void TileMap::set_mode(Mode p_mode) {
 	mode = p_mode;
 	_recreate_quadrants();
 	emit_signal("settings_changed");
+	ERR_FAIL_MSG("set_mode");
 }
 
 TileMap::Mode TileMap::get_mode() const {

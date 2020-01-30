@@ -615,6 +615,8 @@ private:
 	bool update_pending;
 	RID texture;
 	int width;
+	int height;
+	int delay;
 
 	void _queue_update();
 	void _update();
@@ -630,7 +632,7 @@ public:
 	int get_width() const;
 
 	virtual RID get_rid() const { return texture; }
-	virtual int get_height() const { return 1; }
+	virtual int get_height() const { return height; }
 	virtual bool has_alpha() const { return true; }
 
 	virtual void set_flags(uint32_t p_flags) {}

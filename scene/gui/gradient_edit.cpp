@@ -30,6 +30,7 @@
 
 #include "gradient_edit.h"
 
+#include "core/os/input.h"
 #include "core/os/keyboard.h"
 
 #ifdef TOOLS_ENABLED
@@ -294,7 +295,10 @@ void GradientEdit::_gui_input(const Ref<InputEvent> &p_event) {
 			}
 		}
 
-		emit_signal("ramp_changed");
+		//if(mm->get_speed() == Vector2(0,0) )
+		if(mb.is_valid() && !mb->is_pressed())
+			emit_signal("ramp_changed");
+		
 
 		update();
 	}
@@ -442,12 +446,16 @@ Size2 GradientEdit::get_minimum_size() const {
 
 void GradientEdit::_color_changed(const Color &p_color) {
 
-	if (grabbed == -1)
+	if (grabbed == -1){
 		return;
+	}
 	points.write[grabbed].color = p_color;
 	update();
+	
 	emit_signal("ramp_changed");
+	
 }
+
 
 void GradientEdit::set_ramp(const Vector<float> &p_offsets, const Vector<Color> &p_colors) {
 

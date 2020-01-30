@@ -138,6 +138,7 @@
 #include "scene/resources/convex_polygon_shape_2d.h"
 #include "scene/resources/cylinder_shape.h"
 #include "scene/resources/default_theme/default_theme.h"
+#include "scene/resources/donut.h"
 #include "scene/resources/dynamic_font.h"
 #include "scene/resources/gradient.h"
 #include "scene/resources/height_map_shape.h"
@@ -609,6 +610,7 @@ void register_scene_types() {
 	ClassDB::register_virtual_class<PrimitiveMesh>();
 	ClassDB::register_class<CapsuleMesh>();
 	ClassDB::register_class<CubeMesh>();
+	ClassDB::register_class<DonutMesh>();
 	ClassDB::register_class<CylinderMesh>();
 	ClassDB::register_class<PlaneMesh>();
 	ClassDB::register_class<PrismMesh>();
